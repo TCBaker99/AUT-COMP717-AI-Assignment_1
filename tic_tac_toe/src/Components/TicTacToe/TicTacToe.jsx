@@ -10,6 +10,7 @@ const TicTacToe = () => {
     
     let [count,setCount] = useState(0);
     let[lock,setLock] = useState(false);
+    let [startingPlayer, setStartingPlayer] = useState('x'); // New state for starting player
     let titleRef = useRef(null);
     let box1 = useRef(null);
     let box2 = useRef(null);
@@ -22,22 +23,22 @@ const TicTacToe = () => {
     let box9 = useRef(null);
     let box_array = [box1,box2,box3,box4,box5,box6,box7,box8,box9];
     
-    const toggle = (e,num) => {
+    const toggle = (e, num) => {
         if (lock) {
-            return 0;
+          return 0;
         }
-        if (count%2===0) {
-            e.target.innerHTML = `<img src='${cross_icon}'>`;
-            data[num]="x";
-            setCount(++count);
+        // Determine the current player based on the starting player and count
+        const currentPlayer = count % 2 === 0 ? startingPlayer : (startingPlayer === 'x' ? 'o' : 'x');
+        if (currentPlayer === 'x') {
+          e.target.innerHTML = `<img src='${cross_icon}'>`;
+          data[num] = "x";
+        } else {
+          e.target.innerHTML = `<img src='${circle_icon}'>`;
+          data[num] = "o";
         }
-        else{
-            e.target.innerHTML = `<img src='${circle_icon}'>`;
-            data[num]="o";
-            setCount(++count);
-        }
+        setCount(++count);
         checkWin();
-    }
+      };
 
     const checkWin = () => {
         if (data[0]===data[1] && data[1]===data[2] && data[2]!=="") {
@@ -85,7 +86,8 @@ const TicTacToe = () => {
         titleRef.current.innerHTML = 'Tic Tac Toe In <span>React</span>'
         box_array.map((e)=>{
             e.current.innerHTML = "";
-        })
+        });
+        setCount(0);
     }
 
     return (
@@ -111,8 +113,9 @@ const TicTacToe = () => {
             </div>
             <button className='reset' onClick={()=>{reset()}}>Reset</button>
             <div className='RightMenu'>
-                <button className='PlayO' onClick={()=>{reset()}}>Play as O</button>
-                <button className='PlayX' onClick={()=>{reset()}}>Play as X</button>
+        {/* Buttons to set the starting player and reset the game */}
+        <button className='PlayO' onClick={() => { setStartingPlayer('o'); reset(); }}>Play as O</button>
+        <button className='PlayX' onClick={() => { setStartingPlayer('x'); reset(); }}>Play as X</button>
             </div>
         </div>
     )
