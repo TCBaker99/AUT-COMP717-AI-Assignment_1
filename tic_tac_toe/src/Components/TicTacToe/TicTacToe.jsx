@@ -1,104 +1,29 @@
-import React, { useRef, useState } from 'react';
-import circle_icon from '../Assets/circle.png';
-import cross_icon from '../Assets/cross.png';
+import React, { useState } from 'react';
+import TicTacToeBoard from './TicTacToeBoard';
 import './TicTacToe.css';
 
-let data = ["", "", "", "", "", "", "", "", ""];
-
 const TicTacToe = () => {
-  let [count, setCount] = useState(0);
-  let [lock, setLock] = useState(false);
-  let [startingPlayer, setStartingPlayer] = useState('x');
-  let [aiMode, setAIMode] = useState("none");
+  const [mode, setMode] = useState(null); // null = Main Menu, "2p", "minimax", "alphabeta"
 
-  let titleRef = useRef(null);
-  let box1 = useRef(null);
-  let box2 = useRef(null);
-  let box3 = useRef(null);
-  let box4 = useRef(null);
-  let box5 = useRef(null);
-  let box6 = useRef(null);
-  let box7 = useRef(null);
-  let box8 = useRef(null);
-  let box9 = useRef(null);
-  let box_array = [box1, box2, box3, box4, box5, box6, box7, box8, box9];
-
-  const reset = () => {
-    setLock(false);
-    data = ["", "", "", "", "", "", "", "", ""];
-    titleRef.current.innerHTML = 'Tic Tac Toe Game In <span>React</span>';
-    box_array.map((e) => {
-      e.current.innerHTML = "";
-    });
-    setCount(0);
-  };
-
-  const handleClick = (index) => {
-    if (lock || data[index] !== "") return;
-
-    const currentPlayer = (count + (startingPlayer === 'o' ? 1 : 0)) % 2 === 0 ? 'x' : 'o';
-    data[index] = currentPlayer;
-    box_array[index].current.innerHTML = `<img src=${currentPlayer === "x" ? cross_icon : circle_icon} />`;
-
-    setCount(count + 1);
-    checkWin();
-  };
-
-  const checkWin = () => {
-    const winConditions = [
-      [0, 1, 2], [3, 4, 5], [6, 7, 8],
-      [0, 3, 6], [1, 4, 7], [2, 5, 8],
-      [0, 4, 8], [2, 4, 6]
-    ];
-
-    for (let condition of winConditions) {
-      const [a, b, c] = condition;
-      if (data[a] && data[a] === data[b] && data[b] === data[c]) {
-        setLock(true);
-        titleRef.current.innerHTML = `${data[a].toUpperCase()} Wins! 🎉`;
-        return;
-      }
-    }
-
-    if (!data.includes("")) {
-      setLock(true);
-      titleRef.current.innerHTML = "It's a Draw!";
-    }
-  };
-
-  return (
-    <div className='container'>
-      <h1 className='title' ref={titleRef}>Tic Tac Toe Game In <span>React</span></h1>
-      <div className='board'>
-        <div className='row1'>
-          <div className='boxes' ref={box1} onClick={() => handleClick(0)}></div>
-          <div className='boxes' ref={box2} onClick={() => handleClick(1)}></div>
-          <div className='boxes' ref={box3} onClick={() => handleClick(2)}></div>
-        </div>
-        <div className='row2'>
-          <div className='boxes' ref={box4} onClick={() => handleClick(3)}></div>
-          <div className='boxes' ref={box5} onClick={() => handleClick(4)}></div>
-          <div className='boxes' ref={box6} onClick={() => handleClick(5)}></div>
-        </div>
-        <div className='row3'>
-          <div className='boxes' ref={box7} onClick={() => handleClick(6)}></div>
-          <div className='boxes' ref={box8} onClick={() => handleClick(7)}></div>
-          <div className='boxes' ref={box9} onClick={() => handleClick(8)}></div>
+  if (mode === null) {
+    return (
+      <div className='main-menu'>
+        <h1>Tic Tac Toe Game</h1>
+        <h3>Select a Game Mode</h3>
+        <div className="AIMenu">
+          <button onClick={() => setMode("2p")}>1: 2 Player Mode</button>
+          <button onClick={() => alert("Minimax AI coming soon!")}>2: Vs Minimax AI</button>
+          <button onClick={() => alert("Alpha Beta AI coming soon!")}>3: Vs Alpha Beta AI</button>
         </div>
       </div>
-      <button className='reset' onClick={() => { reset() }}>Reset</button>
-      <div className='RightMenu'>
-        <button className='PlayO' onClick={() => { setStartingPlayer('o'); reset(); }}>Play as O</button>
-        <button className='PlayX' onClick={() => { setStartingPlayer('x'); reset(); }}>Play as X</button>
-      </div>
-      <div className='AIMenu'>
-        <h3>AI Mode</h3>
-        <button onClick={() => setAIMode("none")}>2 Player</button>
-        <button onClick={() => setAIMode("minimax")}>Play vs Minimax</button>
-        <button onClick={() => setAIMode("alphabeta")}>Play vs Alpha-Beta</button>
-      </div>
-    </div>
-  );
+    );
+  }
+
+  if (mode === "2p") {
+    return <TicTacToeBoard onBack={() => setMode(null)} />;
+  }
+
+  return null;
 };
 
 export default TicTacToe;
