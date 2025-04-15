@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import TicTacToeBoard from './TicTacToeBoard';
-import './TicTacToe.css';
+import './MainMenu.css';
 
 const TicTacToe = () => {
   const [mode, setMode] = useState(null); // null = Main Menu, "2p", "minimax", "alphabeta"
