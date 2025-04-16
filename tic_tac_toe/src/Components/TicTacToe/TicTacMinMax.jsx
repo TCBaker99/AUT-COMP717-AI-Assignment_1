@@ -9,6 +9,9 @@ const TicTacMinMax = ({ onBack, startingPlayer }) => {
   const [currentData, setCurrentData] = useState(Array(9).fill(""));
 
   const titleRef = useRef(null);
+
+  // ✅ FIX: define refs manually to avoid violating rules of hooks
+  const box0 = useRef(null);
   const box1 = useRef(null);
   const box2 = useRef(null);
   const box3 = useRef(null);
@@ -17,17 +20,19 @@ const TicTacMinMax = ({ onBack, startingPlayer }) => {
   const box6 = useRef(null);
   const box7 = useRef(null);
   const box8 = useRef(null);
-  const box9 = useRef(null);
-  const box_array = [box1, box2, box3, box4, box5, box6, box7, box8, box9];
+  const box_array = [box0, box1, box2, box3, box4, box5, box6, box7, box8];
 
   const playerIcon = {
     x: cross_icon,
     o: circle_icon,
   };
 
-  const isAITurn = useCallback((ai) => {
-    return ((count + (startingPlayer === 'o' ? 1 : 0)) % 2 === 0 ? 'x' : 'o') === ai;
-  }, [count, startingPlayer]);
+  const humanPlayer = startingPlayer;
+  const aiPlayer = humanPlayer === 'x' ? 'o' : 'x';
+
+  const getCurrentPlayer = () => (count % 2 === 0 ? 'x' : 'o');
+
+  const isAITurn = () => getCurrentPlayer() === aiPlayer;
 
   const evaluateWinner = useCallback((board) => {
     const winConditions = [
@@ -41,18 +46,18 @@ const TicTacMinMax = ({ onBack, startingPlayer }) => {
     return board.includes("") ? null : "draw";
   }, []);
 
-  const minimax = useCallback((board, isMaximizing, ai, human) => {
+  const minimax = useCallback((board, isMaximizing) => {
     const winner = evaluateWinner(board);
-    if (winner === ai) return 10;
-    if (winner === human) return -10;
+    if (winner === aiPlayer) return 10;
+    if (winner === humanPlayer) return -10;
     if (winner === "draw") return 0;
 
     let bestScore = isMaximizing ? -Infinity : Infinity;
 
     for (let i = 0; i < 9; i++) {
       if (board[i] === "") {
-        board[i] = isMaximizing ? ai : human;
-        const score = minimax(board, !isMaximizing, ai, human);
+        board[i] = isMaximizing ? aiPlayer : humanPlayer;
+        const score = minimax(board, !isMaximizing);
         board[i] = "";
         bestScore = isMaximizing
           ? Math.max(score, bestScore)
@@ -60,15 +65,15 @@ const TicTacMinMax = ({ onBack, startingPlayer }) => {
       }
     }
     return bestScore;
-  }, [evaluateWinner]);
+  }, [aiPlayer, humanPlayer, evaluateWinner]);
 
-  const bestMove = useCallback((board, ai, human) => {
+  const bestMove = useCallback((board) => {
     let bestScore = -Infinity;
     let move = -1;
     for (let i = 0; i < 9; i++) {
       if (board[i] === "") {
-        board[i] = ai;
-        const score = minimax(board, false, ai, human);
+        board[i] = aiPlayer;
+        const score = minimax(board, false);
         board[i] = "";
         if (score > bestScore) {
           bestScore = score;
@@ -77,22 +82,21 @@ const TicTacMinMax = ({ onBack, startingPlayer }) => {
       }
     }
     return move;
-  }, [minimax]);
+  }, [aiPlayer, minimax]);
 
   const makeMove = useCallback((index, player) => {
+    if (lock || currentData[index] !== "") return;
     const updated = [...currentData];
     updated[index] = player;
     setCurrentData(updated);
     box_array[index].current.innerHTML = `<img src=${playerIcon[player]} />`;
     setCount((prev) => prev + 1);
-  }, [currentData]);
-
-  const getCurrentPlayer = () =>
-    (count + (startingPlayer === 'o' ? 1 : 0)) % 2 === 0 ? 'x' : 'o';
+  }, [currentData, lock]);
 
   const handleClick = (index) => {
-    if (lock || currentData[index] !== "" || isAITurn(startingPlayer)) return;
-    makeMove(index, getCurrentPlayer());
+    if (lock || currentData[index] !== "") return;
+    if (getCurrentPlayer() !== humanPlayer) return;
+    makeMove(index, humanPlayer);
   };
 
   const checkGameState = useCallback(() => {
@@ -116,17 +120,15 @@ const TicTacMinMax = ({ onBack, startingPlayer }) => {
 
   useEffect(() => {
     checkGameState();
-
-    const ai = startingPlayer === 'x' ? 'x' : 'o';
-    const human = ai === 'x' ? 'o' : 'x';
-
-    if (!lock && isAITurn(ai)) {
-      const move = bestMove([...currentData], ai, human);
+    if (!lock && isAITurn()) {
+      const move = bestMove([...currentData]);
       if (move !== -1) {
-        setTimeout(() => makeMove(move, ai), 300);
+        setTimeout(() => {
+          makeMove(move, aiPlayer);
+        }, 200);
       }
     }
-  }, [currentData, count, lock, startingPlayer, isAITurn, bestMove, makeMove, checkGameState]);
+  }, [currentData, count, lock, bestMove, makeMove, checkGameState]);
 
   return (
     <div className='container'>
