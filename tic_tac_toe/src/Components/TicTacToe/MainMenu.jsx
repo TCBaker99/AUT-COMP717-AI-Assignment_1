@@ -8,8 +8,8 @@ const MainMenu = () => {
   if (mode === null) {
     return (
       <div className='main-menu'>
-        <h1>Tic Tac Toe Game</h1>
-        <h3>Select a Game Mode</h3>
+        <h1 className="main-menu-title">Tic Tac Toe Game</h1>
+        <h3 className="main-menu-subtitle">Select a Game Mode</h3>
         <div className="AIMenu">
           <button onClick={() => setMode("2p")}>1: 2 Player Mode</button>
           <button onClick={() => alert("Minimax AI coming soon!")}>2: Vs Minimax AI</button>
