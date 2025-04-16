@@ -7,31 +7,20 @@ const TicTacMinMax = ({ onBack, startingPlayer }) => {
   const [count, setCount] = useState(0);
   const [lock, setLock] = useState(false);
   const [currentData, setCurrentData] = useState(Array(9).fill(""));
+  const [hasAIMoved, setHasAIMoved] = useState(false); // ✅ NEW
 
   const titleRef = useRef(null);
 
-  // ✅ FIX: define refs manually to avoid violating rules of hooks
-  const box0 = useRef(null);
-  const box1 = useRef(null);
-  const box2 = useRef(null);
-  const box3 = useRef(null);
-  const box4 = useRef(null);
-  const box5 = useRef(null);
-  const box6 = useRef(null);
-  const box7 = useRef(null);
-  const box8 = useRef(null);
+  const box0 = useRef(null), box1 = useRef(null), box2 = useRef(null);
+  const box3 = useRef(null), box4 = useRef(null), box5 = useRef(null);
+  const box6 = useRef(null), box7 = useRef(null), box8 = useRef(null);
   const box_array = [box0, box1, box2, box3, box4, box5, box6, box7, box8];
 
-  const playerIcon = {
-    x: cross_icon,
-    o: circle_icon,
-  };
-
+  const playerIcon = { x: cross_icon, o: circle_icon };
   const humanPlayer = startingPlayer;
   const aiPlayer = humanPlayer === 'x' ? 'o' : 'x';
 
   const getCurrentPlayer = () => (count % 2 === 0 ? 'x' : 'o');
-
   const isAITurn = () => getCurrentPlayer() === aiPlayer;
 
   const evaluateWinner = useCallback((board) => {
@@ -53,7 +42,6 @@ const TicTacMinMax = ({ onBack, startingPlayer }) => {
     if (winner === "draw") return 0;
 
     let bestScore = isMaximizing ? -Infinity : Infinity;
-
     for (let i = 0; i < 9; i++) {
       if (board[i] === "") {
         board[i] = isMaximizing ? aiPlayer : humanPlayer;
@@ -91,7 +79,13 @@ const TicTacMinMax = ({ onBack, startingPlayer }) => {
     setCurrentData(updated);
     box_array[index].current.innerHTML = `<img src=${playerIcon[player]} />`;
     setCount((prev) => prev + 1);
-  }, [currentData, lock]);
+
+    if (player === aiPlayer) {
+      setHasAIMoved(true); // ✅ mark that AI has moved this turn
+    } else {
+      setHasAIMoved(false); // ✅ allow AI to move again after human's turn
+    }
+  }, [currentData, lock, aiPlayer]);
 
   const handleClick = (index) => {
     if (lock || currentData[index] !== "") return;
@@ -111,6 +105,7 @@ const TicTacMinMax = ({ onBack, startingPlayer }) => {
   const reset = () => {
     setLock(false);
     setCount(0);
+    setHasAIMoved(false); // ✅ reset AI move flag
     setCurrentData(Array(9).fill(""));
     titleRef.current.innerHTML = 'Tic Tac Toe Game In <span>React</span>';
     box_array.forEach((ref) => {
@@ -120,7 +115,8 @@ const TicTacMinMax = ({ onBack, startingPlayer }) => {
 
   useEffect(() => {
     checkGameState();
-    if (!lock && isAITurn()) {
+
+    if (!lock && isAITurn() && !hasAIMoved) {
       const move = bestMove([...currentData]);
       if (move !== -1) {
         setTimeout(() => {
@@ -128,7 +124,7 @@ const TicTacMinMax = ({ onBack, startingPlayer }) => {
         }, 200);
       }
     }
-  }, [currentData, count, lock, bestMove, makeMove, checkGameState]);
+  }, [currentData, count, lock, hasAIMoved, bestMove, makeMove, checkGameState]);
 
   return (
     <div className='container'>
