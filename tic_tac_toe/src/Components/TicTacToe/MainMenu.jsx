@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import TicTacToeBoard from './TicTacToeBoard';
+import TicTacMinMax from './TicTacMinMax';
 import './MainMenu.css';
 
 const MainMenu = () => {
-  const [mode, setMode] = useState(null); // null = Main Menu, "2p", "minimax", "alphabeta"
+  const [mode, setMode] = useState(null); // null = Main Menu, "2p", "minmax", "alphabeta"
 
   if (mode === null) {
     return (
@@ -12,7 +13,7 @@ const MainMenu = () => {
         <h3 className="main-menu-subtitle">Select a Game Mode</h3>
         <div className="AIMenu">
           <button onClick={() => setMode("2p")}>1: 2 Player Mode</button>
-          <button onClick={() => alert("Minimax AI coming soon!")}>2: Vs Minimax AI</button>
+          <button onClick={() => setMode("minmax")}>2: Vs Minmax AI</button>
           <button onClick={() => alert("Alpha Beta AI coming soon!")}>3: Vs Alpha Beta AI</button>
         </div>
       </div>
@@ -23,7 +24,11 @@ const MainMenu = () => {
     return <TicTacToeBoard onBack={() => setMode(null)} />;
   }
 
+  if (mode === "minmax") {
+    return <TicTacMinMax onBack={() => setMode(null)} />;
+  }
+
   return null;
 };
 
-export default MainMenu; 
+export default MainMenu;
