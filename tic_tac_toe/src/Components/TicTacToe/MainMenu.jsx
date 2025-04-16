@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
 import TicTacToeBoard from './TicTacToeBoard';
 import TicTacMinMax from './TicTacMinMax';
+import MinMaxSelection from './MinMaxSelection'; // NEW
 import './MainMenu.css';
 
 const MainMenu = () => {
-  const [mode, setMode] = useState(null); // null = Main Menu, "2p", "minmax", "alphabeta"
+  const [mode, setMode] = useState(null); // null = Main Menu, "2p", "minmax-select", "minmax", etc.
+  const [startingPlayer, setStartingPlayer] = useState('x'); // NEW
 
   if (mode === null) {
     return (
@@ -13,7 +15,7 @@ const MainMenu = () => {
         <h3 className="main-menu-subtitle">Select a Game Mode</h3>
         <div className="AIMenu">
           <button onClick={() => setMode("2p")}>1: 2 Player Mode</button>
-          <button onClick={() => setMode("minmax")}>2: Vs Minmax AI</button>
+          <button onClick={() => setMode("minmax-select")}>2: Vs Minmax AI</button>
           <button onClick={() => alert("Alpha Beta AI coming soon!")}>3: Vs Alpha Beta AI</button>
         </div>
       </div>
@@ -24,8 +26,24 @@ const MainMenu = () => {
     return <TicTacToeBoard onBack={() => setMode(null)} />;
   }
 
+  if (mode === "minmax-select") {
+    return (
+      <MinMaxSelection
+        onSelect={(player) => {
+          setStartingPlayer(player);
+          setMode("minmax");
+        }}
+      />
+    );
+  }
+
   if (mode === "minmax") {
-    return <TicTacMinMax onBack={() => setMode(null)} />;
+    return (
+      <TicTacMinMax
+        onBack={() => setMode(null)}
+        startingPlayer={startingPlayer} // NEW
+      />
+    );
   }
 
   return null;

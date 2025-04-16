@@ -1,97 +1,155 @@
-import React, { useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import circle_icon from '../Assets/circle.png';
 import cross_icon from '../Assets/cross.png';
 import './TicTacToe.css';
 
-let data = ["", "", "", "", "", "", "", "", ""];
+const TicTacMinMax = ({ onBack, startingPlayer }) => {
+  const [count, setCount] = useState(0);
+  const [lock, setLock] = useState(false);
+  const [currentData, setCurrentData] = useState(Array(9).fill(""));
 
-const TicTacMinMax = ({ onBack }) => {
-  let [count, setCount] = useState(0);
-  let [lock, setLock] = useState(false);
-  let [startingPlayer, setStartingPlayer] = useState('x');
-  let [aiMode, setAIMode] = useState("none");
+  const titleRef = useRef(null);
+  const box1 = useRef(null);
+  const box2 = useRef(null);
+  const box3 = useRef(null);
+  const box4 = useRef(null);
+  const box5 = useRef(null);
+  const box6 = useRef(null);
+  const box7 = useRef(null);
+  const box8 = useRef(null);
+  const box9 = useRef(null);
+  const box_array = [box1, box2, box3, box4, box5, box6, box7, box8, box9];
 
-  let titleRef = useRef(null);
-  let box1 = useRef(null);
-  let box2 = useRef(null);
-  let box3 = useRef(null);
-  let box4 = useRef(null);
-  let box5 = useRef(null);
-  let box6 = useRef(null);
-  let box7 = useRef(null);
-  let box8 = useRef(null);
-  let box9 = useRef(null);
-  let box_array = [box1, box2, box3, box4, box5, box6, box7, box8, box9];
-
-  const reset = () => {
-    setLock(false);
-    data = ["", "", "", "", "", "", "", "", ""];
-    titleRef.current.innerHTML = 'Tic Tac Toe Game In <span>React</span>';
-    box_array.map((e) => {
-      e.current.innerHTML = "";
-    });
-    setCount(0);
+  const playerIcon = {
+    x: cross_icon,
+    o: circle_icon,
   };
 
-  const handleClick = (index) => {
-    if (lock || data[index] !== "") return;
+  const isAITurn = useCallback((ai) => {
+    return ((count + (startingPlayer === 'o' ? 1 : 0)) % 2 === 0 ? 'x' : 'o') === ai;
+  }, [count, startingPlayer]);
 
-    const currentPlayer = (count + (startingPlayer === 'o' ? 1 : 0)) % 2 === 0 ? 'x' : 'o';
-    data[index] = currentPlayer;
-    box_array[index].current.innerHTML = `<img src=${currentPlayer === "x" ? cross_icon : circle_icon} />`;
-
-    setCount(count + 1);
-    checkWin();
-  };
-
-  const checkWin = () => {
+  const evaluateWinner = useCallback((board) => {
     const winConditions = [
       [0, 1, 2], [3, 4, 5], [6, 7, 8],
       [0, 3, 6], [1, 4, 7], [2, 5, 8],
       [0, 4, 8], [2, 4, 6]
     ];
+    for (let [a, b, c] of winConditions) {
+      if (board[a] && board[a] === board[b] && board[b] === board[c]) return board[a];
+    }
+    return board.includes("") ? null : "draw";
+  }, []);
 
-    for (let condition of winConditions) {
-      const [a, b, c] = condition;
-      if (data[a] && data[a] === data[b] && data[b] === data[c]) {
-        setLock(true);
-        titleRef.current.innerHTML = `${data[a].toUpperCase()} Wins! 🎉`;
-        return;
+  const minimax = useCallback((board, isMaximizing, ai, human) => {
+    const winner = evaluateWinner(board);
+    if (winner === ai) return 10;
+    if (winner === human) return -10;
+    if (winner === "draw") return 0;
+
+    let bestScore = isMaximizing ? -Infinity : Infinity;
+
+    for (let i = 0; i < 9; i++) {
+      if (board[i] === "") {
+        board[i] = isMaximizing ? ai : human;
+        const score = minimax(board, !isMaximizing, ai, human);
+        board[i] = "";
+        bestScore = isMaximizing
+          ? Math.max(score, bestScore)
+          : Math.min(score, bestScore);
       }
     }
+    return bestScore;
+  }, [evaluateWinner]);
 
-    if (!data.includes("")) {
-      setLock(true);
-      titleRef.current.innerHTML = "It's a Draw!";
+  const bestMove = useCallback((board, ai, human) => {
+    let bestScore = -Infinity;
+    let move = -1;
+    for (let i = 0; i < 9; i++) {
+      if (board[i] === "") {
+        board[i] = ai;
+        const score = minimax(board, false, ai, human);
+        board[i] = "";
+        if (score > bestScore) {
+          bestScore = score;
+          move = i;
+        }
+      }
     }
+    return move;
+  }, [minimax]);
+
+  const makeMove = useCallback((index, player) => {
+    const updated = [...currentData];
+    updated[index] = player;
+    setCurrentData(updated);
+    box_array[index].current.innerHTML = `<img src=${playerIcon[player]} />`;
+    setCount((prev) => prev + 1);
+  }, [currentData]);
+
+  const getCurrentPlayer = () =>
+    (count + (startingPlayer === 'o' ? 1 : 0)) % 2 === 0 ? 'x' : 'o';
+
+  const handleClick = (index) => {
+    if (lock || currentData[index] !== "" || isAITurn(startingPlayer)) return;
+    makeMove(index, getCurrentPlayer());
   };
+
+  const checkGameState = useCallback(() => {
+    const winner = evaluateWinner(currentData);
+    if (winner) {
+      setLock(true);
+      titleRef.current.innerHTML =
+        winner === "draw" ? "It's a Draw!" : `${winner.toUpperCase()} Wins! 🎉`;
+    }
+  }, [currentData, evaluateWinner]);
+
+  const reset = () => {
+    setLock(false);
+    setCount(0);
+    setCurrentData(Array(9).fill(""));
+    titleRef.current.innerHTML = 'Tic Tac Toe Game In <span>React</span>';
+    box_array.forEach((ref) => {
+      if (ref.current) ref.current.innerHTML = "";
+    });
+  };
+
+  useEffect(() => {
+    checkGameState();
+
+    const ai = startingPlayer === 'x' ? 'x' : 'o';
+    const human = ai === 'x' ? 'o' : 'x';
+
+    if (!lock && isAITurn(ai)) {
+      const move = bestMove([...currentData], ai, human);
+      if (move !== -1) {
+        setTimeout(() => makeMove(move, ai), 300);
+      }
+    }
+  }, [currentData, count, lock, startingPlayer, isAITurn, bestMove, makeMove, checkGameState]);
 
   return (
     <div className='container'>
       <h1 className='title' ref={titleRef}>Tic Tac Toe Game In <span>React</span></h1>
       <div className='board'>
-        <div className='row1'>
-          <div className='boxes' ref={box1} onClick={() => handleClick(0)}></div>
-          <div className='boxes' ref={box2} onClick={() => handleClick(1)}></div>
-          <div className='boxes' ref={box3} onClick={() => handleClick(2)}></div>
-        </div>
-        <div className='row2'>
-          <div className='boxes' ref={box4} onClick={() => handleClick(3)}></div>
-          <div className='boxes' ref={box5} onClick={() => handleClick(4)}></div>
-          <div className='boxes' ref={box6} onClick={() => handleClick(5)}></div>
-        </div>
-        <div className='row3'>
-          <div className='boxes' ref={box7} onClick={() => handleClick(6)}></div>
-          <div className='boxes' ref={box8} onClick={() => handleClick(7)}></div>
-          <div className='boxes' ref={box9} onClick={() => handleClick(8)}></div>
-        </div>
+        {[0, 1, 2].map((row) => (
+          <div key={row} className={`row${row + 1}`}>
+            {[0, 1, 2].map((col) => {
+              const i = row * 3 + col;
+              return (
+                <div
+                  key={i}
+                  className='boxes'
+                  ref={box_array[i]}
+                  onClick={() => handleClick(i)}
+                ></div>
+              );
+            })}
+          </div>
+        ))}
       </div>
       <button className='reset' onClick={reset}>Reset</button>
       <button className='back' onClick={onBack}>Back to Menu</button>
-      <div className='RightMenu'>
-        <button className='PlayO' onClick={() => { setStartingPlayer('o'); reset(); }}>Play as O</button>
-        <button className='PlayX' onClick={() => { setStartingPlayer('x'); reset(); }}>Play as X</button>
-      </div>
     </div>
   );
 };
