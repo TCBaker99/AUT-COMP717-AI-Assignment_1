@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import TicTacToeBoard from './TicTacToeBoard';
 import './MainMenu.css';
 
-const TicTacToe = () => {
+const MainMenu = () => {
   const [mode, setMode] = useState(null); // null = Main Menu, "2p", "minimax", "alphabeta"
 
   if (mode === null) {
@@ -26,4 +26,4 @@ const TicTacToe = () => {
   return null;
 };
 
-export default TicTacToe; //Test Commit Message
+export default MainMenu; 

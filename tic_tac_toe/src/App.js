@@ -1,10 +1,10 @@
 import './App.css';
-import TicTacToe from './Components/TicTacToe/TicTacToe';
+import MainMenu from './Components/TicTacToe/MainMenu';
 
 function App() {
   return (
     <div>
-      <TicTacToe/>
+      <MainMenu/>
     </div>
   );
 }
