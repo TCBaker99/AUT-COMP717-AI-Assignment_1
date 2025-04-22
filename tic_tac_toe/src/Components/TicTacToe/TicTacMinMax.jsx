@@ -83,6 +83,9 @@ const TicTacMinMax = ({ onBack, startingPlayer }) => {
   return (
     <div className='container'>
       <h1 className='title' ref={titleRef}>Tic Tac Toe Game In <span>React</span></h1>
+      <p style={{ color: '#26ffcb', fontSize: '18px', marginBottom: '20px' }}>
+        Note: If the human is playing as O, please click reset before playing
+      </p>
       <div className='board'>
         {[0, 1, 2].map(row => (
           <div key={row} className={`row${row + 1}`}>
@@ -101,7 +104,7 @@ const TicTacMinMax = ({ onBack, startingPlayer }) => {
         ))}
       </div>
       <button className='reset' onClick={reset}>Reset</button>
-      <button className='back' onClick={onBack}>Back to Menu</button>
+      <button className='reset' onClick={onBack}>Back to Menu</button>
     </div>
   );
 };
