@@ -87,11 +87,7 @@ const TicTacToeBoard = ({ onBack }) => {
         </div>
       </div>
       <button className='reset' onClick={reset}>Reset</button>
-      <button className='back' onClick={onBack}>Back to Menu</button>
-      <div className='RightMenu'>
-        <button className='PlayO' onClick={() => { setStartingPlayer('o'); reset(); }}>Play as O</button>
-        <button className='PlayX' onClick={() => { setStartingPlayer('x'); reset(); }}>Play as X</button>
-      </div>
+      <button className='reset' onClick={onBack}>Back to Menu</button>
     </div>
   );
 };
