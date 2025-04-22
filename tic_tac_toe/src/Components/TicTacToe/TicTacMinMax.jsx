@@ -8,7 +8,7 @@ const TicTacMinMax = ({ onBack, startingPlayer }) => {
   const [lock, setLock] = useState(false);
   const [boardData, setBoardData] = useState(Array(9).fill(""));
 
-  const box_array = Array.from({ length: 9 }, () => useRef(null));
+  const box_array = useRef([]);
   const titleRef = useRef(null);
 
   const playerIcon = { x: cross_icon, o: circle_icon };
@@ -19,8 +19,8 @@ const TicTacMinMax = ({ onBack, startingPlayer }) => {
 
   const renderBoard = (updatedBoard) => {
     updatedBoard.forEach((val, i) => {
-      if (val !== "" && box_array[i].current.innerHTML === "") {
-        box_array[i].current.innerHTML = `<img src=${playerIcon[val]} />`;
+      if (val !== "" && box_array.current[i]?.innerHTML === "") {
+        box_array.current[i].innerHTML = `<img src=${playerIcon[val]} />`;
       }
     });
   };
@@ -38,7 +38,7 @@ const TicTacMinMax = ({ onBack, startingPlayer }) => {
     const updated = [...boardData];
     updated[index] = player;
     setBoardData(updated);
-    box_array[index].current.innerHTML = `<img src=${playerIcon[player]} />`;
+    box_array.current[index].innerHTML = `<img src=${playerIcon[player]} />`;
     setCount(prev => prev + 1);
   };
 
@@ -53,12 +53,11 @@ const TicTacMinMax = ({ onBack, startingPlayer }) => {
     setLock(false);
     setCount(0);
     titleRef.current.innerHTML = 'Tic Tac Toe Game In <span>React</span>';
-    box_array.forEach(ref => {
-      if (ref.current) ref.current.innerHTML = "";
+    box_array.current.forEach(ref => {
+      if (ref) ref.innerHTML = "";
     });
   };
 
-  // Call the Flask API
   useEffect(() => {
     const aiTurn = getCurrentPlayer() === aiPlayer;
 
@@ -93,7 +92,7 @@ const TicTacMinMax = ({ onBack, startingPlayer }) => {
                 <div
                   key={i}
                   className='boxes'
-                  ref={box_array[i]}
+                  ref={(el) => (box_array.current[i] = el)}
                   onClick={() => handleClick(i)}
                 ></div>
               );
