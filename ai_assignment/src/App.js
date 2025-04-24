@@ -1,5 +1,5 @@
 import './App.css';
-import MainMenu from './Components/TicTacToe/MainMenu';
+import MainMenu from './Components/AiAssignment/MainMenu';
 
 function App() {
   return (
