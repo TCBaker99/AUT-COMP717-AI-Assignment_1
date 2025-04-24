@@ -1,9 +1,10 @@
+
 import React, { useEffect, useRef, useState } from 'react';
 import circle_icon from '../Assets/circle.png';
 import cross_icon from '../Assets/cross.png';
 import './TicTacToe.css';
 
-const TicTacAlphaBeta = ({ onBack, startingPlayer }) => {
+const TicTacAlphaBeta = ({ onBack, startingPlayer, depth }) => {
   const [count, setCount] = useState(0);
   const [lock, setLock] = useState(false);
   const [boardData, setBoardData] = useState(Array(9).fill(""));
@@ -62,10 +63,10 @@ const TicTacAlphaBeta = ({ onBack, startingPlayer }) => {
     const aiTurn = getCurrentPlayer() === aiPlayer;
 
     const getAIMove = async () => {
-      const response = await fetch("http://localhost:5000/move-ab", {
+      const response = await fetch("http://localhost:5000/move-ab-limited", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ board: boardData, ai: aiPlayer })
+        body: JSON.stringify({ board: boardData, ai: aiPlayer, depth: depth })
       });
 
       const result = await response.json();
@@ -78,7 +79,7 @@ const TicTacAlphaBeta = ({ onBack, startingPlayer }) => {
     if (!lock && aiTurn) {
       getAIMove();
     }
-  }, [boardData, count, lock, aiPlayer]);
+  }, [boardData, count, lock, aiPlayer, depth]);
 
   return (
     <div className='container'>

@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import TicTacToeBoard from './TicTacToeBoard';
 import TicTacMinMax from './TicTacMinMax';
@@ -11,6 +12,7 @@ import './MainMenu.css';
 const MainMenu = () => {
   const [mode, setMode] = useState(null);
   const [startingPlayer, setStartingPlayer] = useState('x');
+  const [depth, setDepth] = useState(9);
   const [aiConfig, setAIConfig] = useState({ x: 'minmax', o: 'alphabeta' });
 
   if (mode === null) {
@@ -24,30 +26,6 @@ const MainMenu = () => {
           <button onClick={() => setMode("alphabeta-select")}>3: Vs Alpha Beta AI</button>
           <button onClick={() => setMode("ai-battle-select")}>4: AI vs AI Mode</button>
         </div>
-
-        <h3 className="main-menu-subtitle">Nim (Coming Soon)</h3>
-        <div className="AIMenu">
-          <button disabled>1: 2 Player Mode</button>
-          <button disabled>2: Vs Minmax AI</button>
-          <button disabled>3: Vs Alpha Beta AI</button>
-          <button disabled>4: AI vs AI Mode</button>
-        </div>
-
-        <h3 className="main-menu-subtitle">Connect Four (Coming Soon)</h3>
-        <div className="AIMenu">
-          <button disabled>1: 2 Player Mode</button>
-          <button disabled>2: Vs Minmax AI</button>
-          <button disabled>3: Vs Alpha Beta AI</button>
-          <button disabled>4: AI vs AI Mode</button>
-        </div>
-
-        <h3 className="main-menu-subtitle">Tiger vs Dogs (Coming Soon)</h3>
-        <div className="AIMenu">
-          <button disabled>1: 2 Player Mode</button>
-          <button disabled>2: Vs Minmax AI</button>
-          <button disabled>3: Vs Alpha Beta AI</button>
-          <button disabled>4: AI vs AI Mode</button>
-        </div>
       </div>
     );
   }
@@ -59,8 +37,9 @@ const MainMenu = () => {
   if (mode === "minmax-select") {
     return (
       <MinMaxSelection
-        onSelect={(player) => {
+        onSelect={({ player, depth }) => {
           setStartingPlayer(player);
+          setDepth(depth);
           setMode("minmax");
         }}
       />
@@ -72,6 +51,7 @@ const MainMenu = () => {
       <TicTacMinMax
         onBack={() => setMode(null)}
         startingPlayer={startingPlayer}
+        depth={depth}
       />
     );
   }
@@ -79,8 +59,9 @@ const MainMenu = () => {
   if (mode === "alphabeta-select") {
     return (
       <AlphaBetaSelection
-        onSelect={(player) => {
+        onSelect={({ player, depth }) => {
           setStartingPlayer(player);
+          setDepth(depth);
           setMode("alphabeta");
         }}
       />
@@ -92,6 +73,7 @@ const MainMenu = () => {
       <TicTacAlphaBeta
         onBack={() => setMode(null)}
         startingPlayer={startingPlayer}
+        depth={depth}
       />
     );
   }
