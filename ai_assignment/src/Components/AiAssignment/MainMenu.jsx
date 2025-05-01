@@ -26,6 +26,12 @@ const MainMenu = () => {
           <button onClick={() => setMode("alphabeta-select")}>3: Vs Alpha Beta AI</button>
           <button onClick={() => setMode("ai-battle-select")}>4: AI vs AI Mode</button>
         </div>
+        <div className="AIMenu">
+          <button disabled>1: 2 Player Mode (7x7)</button>
+          <button disabled>2: Vs Minmax AI (7x7)</button>
+          <button disabled>3: Vs Alpha Beta AI (7x7)</button>
+          <button disabled>4: AI vs AI Mode (7x7)</button>
+        </div>
       </div>
     );
   }
