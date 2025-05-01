@@ -27,11 +27,29 @@ const MainMenu = () => {
           <button onClick={() => setMode("alphabeta-select")}>3: Vs Alpha Beta AI</button>
           <button onClick={() => setMode("ai-battle-select")}>4: AI vs AI Mode</button>
         </div>
+
+        <h3 className="main-menu-subtitle">Nim (Coming Soon)</h3>
         <div className="AIMenu">
-          <button onClick={() => setMode("2p-7x7")}>1: 2 Player Mode (7x7)</button>
-          <button disabled>2: Vs Minmax AI (7x7)</button>
-          <button disabled>3: Vs Alpha Beta AI (7x7)</button>
-          <button disabled>4: AI vs AI Mode (7x7)</button>
+          <button disabled>1: 2 Player Mode</button>
+          <button disabled>2: Vs Minmax AI</button>
+          <button disabled>3: Vs Alpha Beta AI</button>
+          <button disabled>4: AI vs AI Mode</button>
+        </div>
+
+        <h3 className="main-menu-subtitle">Connect Four (Coming Soon)</h3>
+        <div className="AIMenu">
+          <button disabled>1: 2 Player Mode</button>
+          <button disabled>2: Vs Minmax AI</button>
+          <button disabled>3: Vs Alpha Beta AI</button>
+          <button disabled>4: AI vs AI Mode</button>
+        </div>
+
+        <h3 className="main-menu-subtitle">Tiger vs Dogs (Coming Soon)</h3>
+        <div className="AIMenu">
+          <button disabled>1: 2 Player Mode</button>
+          <button disabled>2: Vs Minmax AI</button>
+          <button disabled>3: Vs Alpha Beta AI</button>
+          <button disabled>4: AI vs AI Mode</button>
         </div>
       </div>
     );
