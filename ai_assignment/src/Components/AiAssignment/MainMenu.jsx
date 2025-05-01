@@ -1,6 +1,7 @@
 
 import React, { useState } from 'react';
 import TicTacToeBoard from './TicTacToeBoard';
+import TicTacToeBoard7x7 from './TicTacToeBoard7x7';
 import TicTacMinMax from './TicTacMinMax';
 import MinMaxSelection from './MinMaxSelection';
 import AlphaBetaSelection from './AlphaBetaSelection';
@@ -27,7 +28,7 @@ const MainMenu = () => {
           <button onClick={() => setMode("ai-battle-select")}>4: AI vs AI Mode</button>
         </div>
         <div className="AIMenu">
-          <button disabled>1: 2 Player Mode (7x7)</button>
+          <button onClick={() => setMode("2p-7x7")}>1: 2 Player Mode (7x7)</button>
           <button disabled>2: Vs Minmax AI (7x7)</button>
           <button disabled>3: Vs Alpha Beta AI (7x7)</button>
           <button disabled>4: AI vs AI Mode (7x7)</button>
@@ -38,6 +39,10 @@ const MainMenu = () => {
 
   if (mode === "2p") {
     return <TicTacToeBoard onBack={() => setMode(null)} />;
+  }
+
+  if (mode === "2p-7x7") {
+    return <TicTacToeBoard7x7 onBack={() => setMode(null)} />;
   }
 
   if (mode === "minmax-select") {
