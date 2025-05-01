@@ -14,6 +14,7 @@ const MainMenu = () => {
   const [startingPlayer, setStartingPlayer] = useState('x');
   const [depth, setDepth] = useState(9);
   const [aiConfig, setAIConfig] = useState({ x: 'minmax', o: 'alphabeta' });
+  const [is7x7, setIs7x7] = useState(false);  // toggle state
 
   if (mode === null) {
     return (
@@ -25,17 +26,18 @@ const MainMenu = () => {
           <button onClick={() => setMode("minmax-select")}>2: Vs Minmax AI</button>
           <button onClick={() => setMode("alphabeta-select")}>3: Vs Alpha Beta AI</button>
           <button onClick={() => setMode("ai-battle-select")}>4: AI vs AI Mode</button>
+          <button onClick={() => setIs7x7(!is7x7)}>
+            Board Size: {is7x7 ? "7x7" : "3x3"}
+          </button>
         </div>
       </div>
     );
   }
 
   if (mode === "2p") {
-    return <TicTacToeBoard onBack={() => setMode(null)} />;
-  }
-
-  if (mode === "2p-7x7") {
-    return <TicTacToeBoard7x7 onBack={() => setMode(null)} />;
+    return is7x7
+      ? <TicTacToeBoard7x7 onBack={() => setMode(null)} />
+      : <TicTacToeBoard onBack={() => setMode(null)} />;
   }
 
   if (mode === "minmax-select") {
