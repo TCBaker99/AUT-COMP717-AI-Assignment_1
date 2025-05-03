@@ -1,110 +1,86 @@
 import React, { useState } from 'react';
-import TicTacToeBoard from './TicTacToeBoard';
-import TicTacToeBoard7x7 from './TicTacToeBoard7x7';
-import TicTacMinMax from './TicTacMinMax';
-import MinMaxSelection from './MinMaxSelection';
-import AlphaBetaSelection from './AlphaBetaSelection';
-import TicTacAlphaBeta from './TicTacAlphaBeta';
-import AIvsAISelection from './AIvsAISelection';
-import TicTacAIBattle from './TicTacAIBattle';
-import './MainMenu.css';
+import TicTacToeGame from './TicTacToeAI';
 
-const MainMenu = () => {
-  const [mode, setMode] = useState(null);
-  const [startingPlayer, setStartingPlayer] = useState('x');
-  const [depth, setDepth] = useState(9);
-  const [aiConfig, setAIConfig] = useState({ x: 'minmax', o: 'alphabeta' });
-  const [is7x7, setIs7x7] = useState(false);  // toggle state
+export default function MainMenu() {
+  const [started, setStarted] = useState(false);
+  const [settings, setSettings] = useState({
+    size: 3,
+    depth: 3,
+    algorithm: 'minimax',
+    aiPlayer: 'X',
+  });
 
-  if (mode === null) {
+  function handleStart() {
+    setStarted(true);
+  }
+
+  if (!started) {
     return (
-      <div className='main-menu'>
-        <h1 className="main-menu-title">Tic Tac Toe Game</h1>
-        <h3 className="main-menu-subtitle">Select a Game Mode</h3>
-        <div className="AIMenu">
-          <button onClick={() => setMode("2p")}>1: 2 Player Mode</button>
-          <button onClick={() => setMode("minmax-select")}>2: Vs Minmax AI</button>
-          <button onClick={() => setMode("alphabeta-select")}>3: Vs Alpha Beta AI</button>
-          <button onClick={() => setMode("ai-battle-select")}>4: AI vs AI Mode</button>
-          <button onClick={() => setIs7x7(!is7x7)}>
-            Board Size: {is7x7 ? "7x7" : "3x3"}
-          </button>
+      <div style={{ maxWidth: '400px', margin: 'auto', padding: '1rem' }}>
+        <h1>Tic Tac Toe AI</h1>
+        <div>
+          <label>
+            Board Size:
+            <select
+              value={settings.size}
+              onChange={e => setSettings({ ...settings, size: parseInt(e.target.value) })}
+            >
+              <option value={3}>3x3</option>
+              <option value={7}>7x7</option>
+            </select>
+          </label>
         </div>
+        <div>
+          <label>
+            Algorithm:
+            <select
+              value={settings.algorithm}
+              onChange={e => setSettings({ ...settings, algorithm: e.target.value })}
+            >
+              <option value="minimax">Minimax</option>
+              <option value="alphabeta">Alpha-Beta</option>
+            </select>
+          </label>
+        </div>
+        <div>
+          <label>
+            Depth:
+            <input
+              type="number"
+              min="1"
+              value={settings.depth}
+              onChange={e => setSettings({ ...settings, depth: parseInt(e.target.value) })}
+            />
+          </label>
+        </div>
+        <div>
+          <label>
+            AI plays:
+            <select
+              value={settings.aiPlayer}
+              onChange={e => setSettings({ ...settings, aiPlayer: e.target.value })}
+            >
+              <option value="X">X</option>
+              <option value="O">O</option>
+            </select>
+          </label>
+        </div>
+        <button onClick={handleStart} style={{ marginTop: '1rem' }}>
+          Start Game
+        </button>
       </div>
     );
   }
 
-  if (mode === "2p") {
-    return is7x7
-      ? <TicTacToeBoard7x7 onBack={() => setMode(null)} />
-      : <TicTacToeBoard onBack={() => setMode(null)} />;
-  }
-
-  if (mode === "minmax-select") {
-    return (
-      <MinMaxSelection
-        onSelect={({ player, depth }) => {
-          setStartingPlayer(player);
-          setDepth(depth);
-          setMode("minmax");
-        }}
+  return (
+    <div style={{ padding: '1rem' }}>
+      <button onClick={() => setStarted(false)}>Back to Menu</button>
+      <TicTacToeGame
+        size={settings.size}
+        depth={settings.depth}
+        algorithm={settings.algorithm}
+        aiPlayer={settings.aiPlayer}
       />
-    );
-  }
-
-  if (mode === "minmax") {
-    return (
-      <TicTacMinMax
-        onBack={() => setMode(null)}
-        startingPlayer={startingPlayer}
-        depth={depth}
-      />
-    );
-  }
-
-  if (mode === "alphabeta-select") {
-    return (
-      <AlphaBetaSelection
-        onSelect={({ player, depth }) => {
-          setStartingPlayer(player);
-          setDepth(depth);
-          setMode("alphabeta");
-        }}
-      />
-    );
-  }
-
-  if (mode === "alphabeta") {
-    return (
-      <TicTacAlphaBeta
-        onBack={() => setMode(null)}
-        startingPlayer={startingPlayer}
-        depth={depth}
-      />
-    );
-  }
-
-  if (mode === "ai-battle-select") {
-    return (
-      <AIvsAISelection
-        onSelect={(config) => {
-          setAIConfig(config);
-          setMode("ai-battle");
-        }}
-      />
-    );
-  }
-
-  if (mode === "ai-battle") {
-    return (
-      <TicTacAIBattle
-        aiTypes={aiConfig}
-        onBack={() => setMode(null)}
-      />
-    );
-  }
-
-  return null;
-};
-
-export default MainMenu;
+    </div>
+  );
+}
