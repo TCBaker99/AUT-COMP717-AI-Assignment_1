@@ -1,10 +1,11 @@
-
-import React from 'react';
+import React, { useState } from 'react';
 import './MainMenu.css';
 import ConnectFourMenu from './ConnectFourMenu';
+import MainMenu from './MainMenu';
 
 export default function NimMenu({ onBack }) {
-  const [inConnectFourMenu, setInConnectFourMenu] = React.useState(false);
+  const [inConnectFourMenu, setInConnectFourMenu] = useState(false);
+
   if (inConnectFourMenu) return <ConnectFourMenu onBack={() => setInConnectFourMenu(false)} />;
 
   return (
