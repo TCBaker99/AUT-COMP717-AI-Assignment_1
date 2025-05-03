@@ -179,20 +179,31 @@ export default function TicTacToeGame({
       setTimeout(() => handleMove(move.row, move.col), 300);
     }
 
-    if (mode === 'ava') {
+    if (mode === 'ava' && !winner && !initialMoveMade.current) {
+      initialMoveMade.current = true; // prevents stacking calls
       const currentAlgorithm = turn === 'X' ? 'minimax' : 'alphabeta';
       const currentDepth = turn === 'X' ? depthMinimax : depthAlphaBeta;
+
       const move =
         currentAlgorithm === 'alphabeta'
           ? getAlphaBetaMove(board.map(r => [...r]), currentDepth, size, turn)
           : getMinimaxMove(board.map(r => [...r]), currentDepth, size, turn);
-      setTimeout(() => handleMove(move.row, move.col), 300);
+
+      setTimeout(() => {
+        handleMove(move.row, move.col);
+        initialMoveMade.current = false; // allow next AI turn
+      }, 300);
     }
   }, [board, turn]);
 
   return (
     <div>
       <button onClick={onBackToMenu} className="back">Back to Menu</button>
+      {mode === 'ava' && (
+        <h4>
+          X (Minimax, depth {depthMinimax}) vs O (Alpha-Beta, depth {depthAlphaBeta})
+        </h4>
+      )}
       <h3>Turn: {turn}</h3>
       <div
         style={{
