@@ -1,27 +1,32 @@
+
 import React, { useState } from 'react';
 import './MainMenu.css';
 import ConnectFourAI from './ConnectFourAI';
-import NimMenu from './NimMenu';
+import TigerVsDogsMenu from './TigerVsDogsMenu';
 
 export default function ConnectFourMenu({ onBack }) {
   const [inGame, setInGame] = useState(false);
   const [gameKey, setGameKey] = useState(0);
-  const [cols, setCols] = useState(5); // Default width
+  const [rows, setRows] = useState(4);
+  const [cols, setCols] = useState(5);
   const [mode, setMode] = useState('hvh');
   const [algorithm, setAlgorithm] = useState('minimax');
   const [depth, setDepth] = useState(3);
   const [depthMinimax, setDepthMinimax] = useState(3);
   const [depthAlphaBeta, setDepthAlphaBeta] = useState(3);
   const [aiPlayer, setAiPlayer] = useState('R');
+  const [inTigerMenu, setInTigerMenu] = useState(false);
 
-  const rows = cols === 5 ? 4 : 7; // Auto match height to width
-  const toggleSize = () => setCols(prev => (prev === 5 ? 8 : 5));
+  const toggleSize = () => {
+    setRows(prev => (prev === 4 ? 7 : 4));
+    setCols(prev => (prev === 5 ? 8 : 5));
+  };
+
   const startGame = () => setInGame(true);
   const resetGame = () => setGameKey(prev => prev + 1);
   const backToMenu = () => setInGame(false);
 
-  const goBackToNim = () => onBack(); // arrow ←
-  const goForward = () => alert("More games coming soon!"); // arrow →
+  if (inTigerMenu) return <TigerVsDogsMenu onBack={() => setInTigerMenu(false)} />;
 
   if (inGame) {
     return (
@@ -47,9 +52,7 @@ export default function ConnectFourMenu({ onBack }) {
     <div className="main-menu">
       <h1 className="main-menu-title">Connect Four AI</h1>
       <div className="AIMenu">
-        <button onClick={toggleSize}>
-          {cols} x {rows}
-        </button>
+        <button onClick={toggleSize}>{cols} x {rows}</button>
         <h3>Mode:</h3>
         <select value={mode} onChange={e => setMode(e.target.value)}>
           <option value="hvh">Human vs Human</option>
@@ -96,8 +99,8 @@ export default function ConnectFourMenu({ onBack }) {
           </>
         )}
         <button onClick={startGame}>Start Game</button>
-        <button style={{ float: 'left' }} onClick={goBackToNim}>←</button>
-        <button style={{ float: 'right' }} onClick={goForward}>→</button>
+        <button style={{ float: 'left' }} onClick={onBack}>←</button>
+        <button style={{ float: 'right' }} onClick={() => setInTigerMenu(true)}>→</button>
       </div>
     </div>
   );
