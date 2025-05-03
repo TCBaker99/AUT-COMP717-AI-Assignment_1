@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 
 function isGameOver(heaps) {
@@ -109,7 +108,11 @@ export default function NimAI({
     if (mode === 'hva' && turn === aiPlayer && !initialMoveMade.current) {
       initialMoveMade.current = true;
       const move = getBestMove(heaps, depth, aiPlayer, algorithm === 'alphabeta');
-      setTimeout(() => setHeaps(move), 300);
+      setTimeout(() => {
+        setHeaps(move);
+        setTurn(prev => (prev === 'A' ? 'B' : 'A'));
+        initialMoveMade.current = false;
+      }, 300);
     }
 
     if (mode === 'ava' && !winner && !initialMoveMade.current) {
@@ -132,11 +135,21 @@ export default function NimAI({
       {heaps.map((count, i) => (
         <div key={i}>
           <span>Heap {i + 1}: {count}</span>
-          {mode !== 'ava' && Array.from({ length: count }, (_, j) => (
-            <button key={j} onClick={() => mode === 'hvh' || (mode === 'hva' && turn !== aiPlayer) ? handleMove(i, j + 1) : null}>
-              Remove {j + 1}
-            </button>
-          ))}
+          {mode !== 'ava' && Array.from({ length: count }, (_, j) => {
+            const isHumanTurn =
+              (mode === 'hvh') ||
+              (mode === 'hva' && turn !== aiPlayer);
+
+            return (
+              <button
+                key={j}
+                onClick={() => isHumanTurn && handleMove(i, j + 1)}
+                disabled={!isHumanTurn}
+              >
+                Remove {j + 1}
+              </button>
+            );
+          })}
         </div>
       ))}
       {winner && <h2>Winner: {winner}</h2>}
