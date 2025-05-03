@@ -1,45 +1,29 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 
-// Game logic utilities
 function checkWinner(board, size) {
   const target = size === 3 ? 3 : 4;
-  // Rows
   for (let r = 0; r < size; r++) {
     for (let c = 0; c <= size - target; c++) {
       const seq = board[r].slice(c, c + target);
-      if (seq[0] && seq.every(cell => cell === seq[0])) {
-        return seq[0];
-      }
+      if (seq[0] && seq.every(cell => cell === seq[0])) return seq[0];
     }
   }
-  // Columns
   for (let c = 0; c < size; c++) {
     for (let r = 0; r <= size - target; r++) {
-      const seq = [];
-      for (let i = 0; i < target; i++) seq.push(board[r + i][c]);
-      if (seq[0] && seq.every(cell => cell === seq[0])) {
-        return seq[0];
-      }
+      const seq = Array.from({ length: target }, (_, i) => board[r + i][c]);
+      if (seq[0] && seq.every(cell => cell === seq[0])) return seq[0];
     }
   }
-  // Diagonals (\)
   for (let r = 0; r <= size - target; r++) {
     for (let c = 0; c <= size - target; c++) {
-      const seq = [];
-      for (let i = 0; i < target; i++) seq.push(board[r + i][c + i]);
-      if (seq[0] && seq.every(cell => cell === seq[0])) {
-        return seq[0];
-      }
+      const seq = Array.from({ length: target }, (_, i) => board[r + i][c + i]);
+      if (seq[0] && seq.every(cell => cell === seq[0])) return seq[0];
     }
   }
-  // Diagonals (/)
   for (let r = 0; r <= size - target; r++) {
     for (let c = target - 1; c < size; c++) {
-      const seq = [];
-      for (let i = 0; i < target; i++) seq.push(board[r + i][c - i]);
-      if (seq[0] && seq.every(cell => cell === seq[0])) {
-        return seq[0];
-      }
+      const seq = Array.from({ length: target }, (_, i) => board[r + i][c - i]);
+      if (seq[0] && seq.every(cell => cell === seq[0])) return seq[0];
     }
   }
   return null;
@@ -57,12 +41,9 @@ function evaluate(board, size, aiPlayer) {
   return null;
 }
 
-// Minimax algorithm
 function minimax(board, depth, isMax, size, ai) {
   const score = evaluate(board, size, ai);
-  if (score !== null || depth === 0) {
-    return score || 0;
-  }
+  if (score !== null || depth === 0) return score || 0;
   const current = isMax ? ai : ai === 'X' ? 'O' : 'X';
   let best = isMax ? -Infinity : Infinity;
   for (let r = 0; r < size; r++) {
@@ -97,12 +78,9 @@ export function getMinimaxMove(board, depth, size, ai) {
   return { row: move[0], col: move[1] };
 }
 
-// Alpha-Beta pruning
 function alphabeta(board, depth, alpha, beta, isMax, size, ai) {
   const score = evaluate(board, size, ai);
-  if (score !== null || depth === 0) {
-    return score || 0;
-  }
+  if (score !== null || depth === 0) return score || 0;
   const current = isMax ? ai : ai === 'X' ? 'O' : 'X';
   if (isMax) {
     let value = -Infinity;
@@ -157,44 +135,64 @@ export function getAlphaBetaMove(board, depth, size, ai) {
   return { row: move[0], col: move[1] };
 }
 
-// Main React component
 export default function TicTacToeGame({
   size = 3,
   depth = 3,
   aiPlayer = 'X',
   algorithm = 'minimax',
+  mode = 'hvh',
+  depthMinimax = 3,
+  depthAlphaBeta = 3,
+  onBackToMenu
 }) {
   const emptyRow = Array(size).fill('');
   const [board, setBoard] = useState(Array.from({ length: size }, () => [...emptyRow]));
   const [turn, setTurn] = useState('X');
   const [winner, setWinner] = useState(null);
+  const initialMoveMade = useRef(false);
+
+  function handleMove(r, c) {
+    if (board[r][c] || winner) return;
+    const next = turn;
+    setBoard(prev => {
+      const copy = prev.map(row => [...row]);
+      copy[r][c] = next;
+      return copy;
+    });
+    setTurn(t => (t === 'X' ? 'O' : 'X'));
+    initialMoveMade.current = false;
+  }
 
   useEffect(() => {
     const result = checkWinner(board, size);
     if (result || isFull(board)) {
       setWinner(result || 'Draw');
-    } else if (turn === aiPlayer) {
-      const { row, col } =
+      return;
+    }
+
+    if (mode === 'hva' && turn === aiPlayer && !initialMoveMade.current) {
+      initialMoveMade.current = true;
+      const move =
         algorithm === 'alphabeta'
           ? getAlphaBetaMove(board.map(r => [...r]), depth, size, aiPlayer)
           : getMinimaxMove(board.map(r => [...r]), depth, size, aiPlayer);
-      setTimeout(() => handleMove(row, col), 300);
+      setTimeout(() => handleMove(move.row, move.col), 300);
+    }
+
+    if (mode === 'ava') {
+      const currentAlgorithm = turn === 'X' ? 'minimax' : 'alphabeta';
+      const currentDepth = turn === 'X' ? depthMinimax : depthAlphaBeta;
+      const move =
+        currentAlgorithm === 'alphabeta'
+          ? getAlphaBetaMove(board.map(r => [...r]), currentDepth, size, turn)
+          : getMinimaxMove(board.map(r => [...r]), currentDepth, size, turn);
+      setTimeout(() => handleMove(move.row, move.col), 300);
     }
   }, [board, turn]);
 
-  function handleMove(r, c) {
-    if (board[r][c] || winner) return;
-    const next = turn;
-    setBoard(b => {
-      const copy = b.map(row => [...row]);
-      copy[r][c] = next;
-      return copy;
-    });
-    setTurn(t => (t === 'X' ? 'O' : 'X'));
-  }
-
   return (
     <div>
+      <button onClick={onBackToMenu} className="back">Back to Menu</button>
       <h3>Turn: {turn}</h3>
       <div
         style={{
@@ -209,7 +207,7 @@ export default function TicTacToeGame({
           row.map((cell, c) => (
             <button
               key={`${r}-${c}`}
-              onClick={() => handleMove(r, c)}
+              onClick={() => mode === 'hvh' || (mode === 'hva' && turn !== aiPlayer) ? handleMove(r, c) : null}
               style={{ height: '40px', fontSize: '1.2rem' }}
             >
               {cell}
