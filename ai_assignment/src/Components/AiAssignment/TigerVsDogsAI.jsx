@@ -1,5 +1,3 @@
-// Updated TigerVsDogsAI.jsx with improved capture logic, Dog AI, evaluation function,
-// and UI support for AI type selection and dual depth settings
 
 import React, { useState, useEffect, useRef } from 'react';
 
@@ -51,21 +49,17 @@ function getValidMoves(board, r, c) {
   return moves;
 }
 
-function checkCaptures(board, r, c) {
+function checkCaptures(board, r, c, player) {
+  if (player !== 'T') return [];
   const captures = [];
   for (let [dr, dc] of directions) {
-    const r1 = r + dr;
-    const c1 = c + dc;
-    const r2 = r + 2 * dr;
-    const c2 = c + 2 * dc;
-
+    const r1 = r + dr, c1 = c + dc;
+    const r2 = r + 2 * dr, c2 = c + 2 * dc;
     if (!isInside(r2, c2)) continue;
     if (board[r1][c1] === 'D' && board[r2][c2] === 'D') {
-      const r3 = r + 3 * dr;
-      const c3 = c + 3 * dc;
+      const r3 = r + 3 * dr, c3 = c + 3 * dc;
       if (!isInside(r3, c3) || board[r3][c3] !== 'D') {
-        captures.push([r1, c1]);
-        captures.push([r2, c2]);
+        captures.push([r1, c1], [r2, c2]);
       }
     }
   }
@@ -80,7 +74,7 @@ function evaluate(board, killed, turn, aiPlayer) {
   const [r, c] = tigerPos;
   const tigerMoves = getValidMoves(board, r, c).length;
   const dogMobility = board.flat().filter(cell => cell === 'D').length;
-  return (aiPlayer === 'T' ? (tigerMoves * 5 - killed * 10) : (dogMobility * 2 + killed * 5));
+  return aiPlayer === 'T' ? (tigerMoves * 5 - killed * 10) : (dogMobility * 2 + killed * 5);
 }
 
 function alphabeta(board, killed, depth, alpha, beta, isMax, aiPlayer, useAlphaBeta = true) {
@@ -95,7 +89,7 @@ function alphabeta(board, killed, depth, alpha, beta, isMax, aiPlayer, useAlphaB
       newBoard[r][c] = null;
       newBoard[nr][nc] = 'T';
       let newKilled = killed;
-      for (let [cr, cc] of checkCaptures(newBoard, nr, nc)) {
+      for (let [cr, cc] of checkCaptures(newBoard, nr, nc, 'T')) {
         newBoard[cr][cc] = null;
         newKilled++;
       }
@@ -141,7 +135,7 @@ function getBestMove(board, killed, depth, player, useAlphaBeta = true) {
       newBoard[r][c] = null;
       newBoard[nr][nc] = 'T';
       let newKilled = killed;
-      for (let [cr, cc] of checkCaptures(newBoard, nr, nc)) {
+      for (let [cr, cc] of checkCaptures(newBoard, nr, nc, 'T')) {
         newBoard[cr][cc] = null;
         newKilled++;
       }
@@ -173,16 +167,13 @@ function getBestMove(board, killed, depth, player, useAlphaBeta = true) {
   return bestMove;
 }
 
-
-export default TigerVsDogsAI;
-
-
-function TigerVsDogsAI({
+export default function TigerVsDogsAI({
   mode = 'hvh',
   aiPlayer = 'T',
   depthTiger = 3,
   depthDogs = 3,
-  aiType = 'alphabeta',
+  aiTypeTiger = 'alphabeta',
+  aiTypeDogs = 'minimax',
   onBackToMenu
 }) {
   const [board, setBoard] = useState(getInitialBoard());
@@ -204,7 +195,7 @@ function TigerVsDogsAI({
           newBoard[sr][sc] = null;
           newBoard[r][c] = turn;
           let newKilled = killed;
-          for (let [cr, cc] of checkCaptures(newBoard, r, c)) {
+          for (let [cr, cc] of checkCaptures(newBoard, r, c, turn)) {
             newBoard[cr][cc] = null;
             newKilled++;
           }
@@ -234,9 +225,8 @@ function TigerVsDogsAI({
 
     if ((isAITurn || isAIvsAI) && !winner && !movePending.current) {
       movePending.current = true;
-
+      const useAlphaBeta = turn === 'T' ? aiTypeTiger === 'alphabeta' : aiTypeDogs === 'alphabeta';
       const currentDepth = turn === 'T' ? depthTiger : depthDogs;
-      const useAlphaBeta = aiType === 'alphabeta';
 
       setTimeout(() => {
         const move = getBestMove(board, killed, currentDepth, turn, useAlphaBeta);
@@ -247,7 +237,7 @@ function TigerVsDogsAI({
           newBoard[fr][fc] = null;
           newBoard[tr][tc] = turn;
           let newKilled = killed;
-          for (let [cr, cc] of checkCaptures(newBoard, tr, tc)) {
+          for (let [cr, cc] of checkCaptures(newBoard, tr, tc, turn)) {
             newBoard[cr][cc] = null;
             newKilled++;
           }
@@ -258,7 +248,7 @@ function TigerVsDogsAI({
         movePending.current = false;
       }, 500);
     }
-  }, [board, turn, mode, aiPlayer, aiType, depthTiger, depthDogs]);
+  }, [board, turn, mode, aiPlayer, aiTypeTiger, aiTypeDogs, depthTiger, depthDogs]);
 
   return (
     <div>
@@ -300,4 +290,3 @@ function TigerVsDogsAI({
     </div>
   );
 }
-

@@ -1,4 +1,4 @@
-// Updated TigerVsDogsMenu.jsx with AI type and depth selection for both players
+
 import React, { useState } from 'react';
 import './MainMenu.css';
 import TigerVsDogsAI from './TigerVsDogsAI';
@@ -9,7 +9,8 @@ export default function TigerVsDogsMenu({ onBack }) {
   const [aiPlayer, setAiPlayer] = useState('T');
   const [depthTiger, setDepthTiger] = useState(3);
   const [depthDogs, setDepthDogs] = useState(3);
-  const [aiType, setAiType] = useState('alphabeta');
+  const [aiTypeTiger, setAiTypeTiger] = useState('alphabeta');
+  const [aiTypeDogs, setAiTypeDogs] = useState('minimax');
 
   const startGame = () => setInGame(true);
   const resetGame = () => setInGame(false);
@@ -23,7 +24,8 @@ export default function TigerVsDogsMenu({ onBack }) {
           aiPlayer={aiPlayer}
           depthTiger={depthTiger}
           depthDogs={depthDogs}
-          aiType={aiType}
+          aiTypeTiger={aiTypeTiger}
+          aiTypeDogs={aiTypeDogs}
           onBackToMenu={resetGame}
         />
       </div>
@@ -41,18 +43,14 @@ export default function TigerVsDogsMenu({ onBack }) {
           <option value="aia">AI vs AI</option>
         </select>
 
-        {(mode === 'hva' || mode === 'aia') && (
+        {mode === 'hva' && (
           <>
             <h3>AI Type:</h3>
-            <select value={aiType} onChange={e => setAiType(e.target.value)}>
+            <select value={aiTypeTiger} onChange={e => setAiTypeTiger(e.target.value)}>
               <option value="minimax">Minimax</option>
               <option value="alphabeta">Alpha-Beta</option>
             </select>
-          </>
-        )}
 
-        {mode === 'hva' && (
-          <>
             <h3>AI Plays:</h3>
             <select value={aiPlayer} onChange={e => setAiPlayer(e.target.value)}>
               <option value="T">Tiger</option>
@@ -75,20 +73,22 @@ export default function TigerVsDogsMenu({ onBack }) {
 
         {mode === 'aia' && (
           <>
+            <h3>AI Type (Tiger):</h3>
+            <select value={aiTypeTiger} onChange={e => setAiTypeTiger(e.target.value)}>
+              <option value="minimax">Minimax</option>
+              <option value="alphabeta">Alpha-Beta</option>
+            </select>
+
+            <h3>AI Type (Dogs):</h3>
+            <select value={aiTypeDogs} onChange={e => setAiTypeDogs(e.target.value)}>
+              <option value="minimax">Minimax</option>
+              <option value="alphabeta">Alpha-Beta</option>
+            </select>
+
             <h3>Depth (Tiger):</h3>
-            <input
-              type="number"
-              min="1"
-              value={depthTiger}
-              onChange={e => setDepthTiger(parseInt(e.target.value) || 1)}
-            />
+            <input type="number" min="1" value={depthTiger} onChange={e => setDepthTiger(parseInt(e.target.value) || 1)} />
             <h3>Depth (Dogs):</h3>
-            <input
-              type="number"
-              min="1"
-              value={depthDogs}
-              onChange={e => setDepthDogs(parseInt(e.target.value) || 1)}
-            />
+            <input type="number" min="1" value={depthDogs} onChange={e => setDepthDogs(parseInt(e.target.value) || 1)} />
           </>
         )}
 
