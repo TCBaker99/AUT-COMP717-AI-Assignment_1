@@ -34,6 +34,7 @@ export default function TigerVsDogsMenu({ onBack }) {
         <select value={mode} onChange={e => setMode(e.target.value)}>
           <option value="hvh">Human vs Human</option>
           <option value="hva">Human vs AI</option>
+<option value="aia">AI vs AI</option>
         </select>
         {mode === 'hva' && (
           <>
@@ -53,6 +54,8 @@ export default function TigerVsDogsMenu({ onBack }) {
         )}
         <button onClick={startGame}>Start Game</button>
         <button style={{ float: 'left' }} onClick={onBack}>←</button>
+        {/* Right arrow (future extension placeholder) */}
+        <button style={{ float: 'right' }} disabled>→</button>
       </div>
     </div>
   );
