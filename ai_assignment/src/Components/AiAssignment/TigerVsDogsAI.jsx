@@ -1,3 +1,5 @@
+// Updated TigerVsDogsAI.jsx with improved capture logic, Dog AI, evaluation function,
+// and UI support for AI type selection and dual depth settings
 
 import React, { useState, useEffect, useRef } from 'react';
 
@@ -24,6 +26,10 @@ function isInside(r, c) {
   return r >= 0 && r < 5 && c >= 0 && c < 5;
 }
 
+function cloneBoard(board) {
+  return board.map(row => [...row]);
+}
+
 function getTigerPosition(board) {
   for (let r = 0; r < 5; r++) {
     for (let c = 0; c < 5; c++) {
@@ -31,10 +37,6 @@ function getTigerPosition(board) {
     }
   }
   return null;
-}
-
-function cloneBoard(board) {
-  return board.map(row => [...row]);
 }
 
 function getValidMoves(board, r, c) {
@@ -50,39 +52,38 @@ function getValidMoves(board, r, c) {
 }
 
 function checkCaptures(board, r, c) {
-  let captured = [];
+  const captures = [];
   for (let [dr, dc] of directions) {
     const r1 = r + dr;
     const c1 = c + dc;
     const r2 = r + 2 * dr;
     const c2 = c + 2 * dc;
-    if (
-      isInside(r2, c2) &&
-      board[r1][c1] === 'D' &&
-      board[r2][c2] === 'D'
-    ) {
+
+    if (!isInside(r2, c2)) continue;
+    if (board[r1][c1] === 'D' && board[r2][c2] === 'D') {
       const r3 = r + 3 * dr;
       const c3 = c + 3 * dc;
       if (!isInside(r3, c3) || board[r3][c3] !== 'D') {
-        captured.push([r1, c1]);
-        captured.push([r2, c2]);
+        captures.push([r1, c1]);
+        captures.push([r2, c2]);
       }
     }
   }
-  return captured;
+  return captures;
 }
 
 function evaluate(board, killed, turn, aiPlayer) {
   if (killed >= 6) return aiPlayer === 'T' ? 100 : -100;
   const tigerPos = getTigerPosition(board);
   if (!tigerPos) return aiPlayer === 'T' ? -100 : 100;
+
   const [r, c] = tigerPos;
-  const tigerMoves = getValidMoves(board, r, c);
-  if (tigerMoves.length === 0) return aiPlayer === 'T' ? -100 : 100;
-  return (aiPlayer === 'T' ? 10 : -10) + tigerMoves.length;
+  const tigerMoves = getValidMoves(board, r, c).length;
+  const dogMobility = board.flat().filter(cell => cell === 'D').length;
+  return (aiPlayer === 'T' ? (tigerMoves * 5 - killed * 10) : (dogMobility * 2 + killed * 5));
 }
 
-function alphabeta(board, killed, depth, alpha, beta, isMax, aiPlayer) {
+function alphabeta(board, killed, depth, alpha, beta, isMax, aiPlayer, useAlphaBeta = true) {
   const score = evaluate(board, killed, isMax ? aiPlayer : (aiPlayer === 'T' ? 'D' : 'T'), aiPlayer);
   if (depth === 0 || Math.abs(score) === 100) return score;
 
@@ -98,9 +99,12 @@ function alphabeta(board, killed, depth, alpha, beta, isMax, aiPlayer) {
         newBoard[cr][cc] = null;
         newKilled++;
       }
-      value = Math.max(value, alphabeta(newBoard, newKilled, depth - 1, alpha, beta, !isMax, aiPlayer));
-      alpha = Math.max(alpha, value);
-      if (alpha >= beta) break;
+      const val = alphabeta(newBoard, newKilled, depth - 1, alpha, beta, !isMax, aiPlayer, useAlphaBeta);
+      value = Math.max(value, val);
+      if (useAlphaBeta) {
+        alpha = Math.max(alpha, value);
+        if (alpha >= beta) break;
+      }
     }
     return value;
   } else {
@@ -112,9 +116,12 @@ function alphabeta(board, killed, depth, alpha, beta, isMax, aiPlayer) {
             const newBoard = cloneBoard(board);
             newBoard[r][c] = null;
             newBoard[nr][nc] = 'D';
-            value = Math.min(value, alphabeta(newBoard, killed, depth - 1, alpha, beta, !isMax, aiPlayer));
-            beta = Math.min(beta, value);
-            if (beta <= alpha) break;
+            const val = alphabeta(newBoard, killed, depth - 1, alpha, beta, !isMax, aiPlayer, useAlphaBeta);
+            value = Math.min(value, val);
+            if (useAlphaBeta) {
+              beta = Math.min(beta, value);
+              if (beta <= alpha) break;
+            }
           }
         }
       }
@@ -123,10 +130,11 @@ function alphabeta(board, killed, depth, alpha, beta, isMax, aiPlayer) {
   }
 }
 
-function getBestMove(board, killed, depth, aiPlayer) {
-  let best = -Infinity;
+function getBestMove(board, killed, depth, player, useAlphaBeta = true) {
+  let best = player === 'T' ? -Infinity : Infinity;
   let bestMove = null;
-  if (aiPlayer === 'T') {
+
+  if (player === 'T') {
     const [r, c] = getTigerPosition(board);
     for (let { to: [nr, nc] } of getValidMoves(board, r, c)) {
       const newBoard = cloneBoard(board);
@@ -137,24 +145,53 @@ function getBestMove(board, killed, depth, aiPlayer) {
         newBoard[cr][cc] = null;
         newKilled++;
       }
-      const val = alphabeta(newBoard, newKilled, depth - 1, -Infinity, Infinity, false, aiPlayer);
+      const val = alphabeta(newBoard, newKilled, depth - 1, -Infinity, Infinity, false, player, useAlphaBeta);
       if (val > best) {
         best = val;
         bestMove = { from: [r, c], to: [nr, nc] };
       }
     }
+  } else {
+    for (let r = 0; r < 5; r++) {
+      for (let c = 0; c < 5; c++) {
+        if (board[r][c] === 'D') {
+          for (let { to: [nr, nc] } of getValidMoves(board, r, c)) {
+            const newBoard = cloneBoard(board);
+            newBoard[r][c] = null;
+            newBoard[nr][nc] = 'D';
+            const val = alphabeta(newBoard, killed, depth - 1, -Infinity, Infinity, false, player, useAlphaBeta);
+            if (val < best) {
+              best = val;
+              bestMove = { from: [r, c], to: [nr, nc] };
+            }
+          }
+        }
+      }
+    }
   }
+
   return bestMove;
 }
 
-export default function TigerVsDogsAI({ depth = 3, aiPlayer = 'T', mode = 'hvh', onBackToMenu }) {
+
+export default TigerVsDogsAI;
+
+
+function TigerVsDogsAI({
+  mode = 'hvh',
+  aiPlayer = 'T',
+  depthTiger = 3,
+  depthDogs = 3,
+  aiType = 'alphabeta',
+  onBackToMenu
+}) {
   const [board, setBoard] = useState(getInitialBoard());
   const [turn, setTurn] = useState('T');
   const [killed, setKilled] = useState(0);
   const [winner, setWinner] = useState(null);
   const [selected, setSelected] = useState(null);
   const [validSquares, setValidSquares] = useState([]);
-  const initialMoveMade = useRef(false);
+  const movePending = useRef(false);
 
   const handleClick = (r, c) => {
     if (winner || (mode !== 'hvh' && turn === aiPlayer)) return;
@@ -163,7 +200,7 @@ export default function TigerVsDogsAI({ depth = 3, aiPlayer = 'T', mode = 'hvh',
       const moves = getValidMoves(board, sr, sc);
       for (const move of moves) {
         if (move.to[0] === r && move.to[1] === c) {
-          const newBoard = cloneBoard(board);
+          const newBoard = board.map(row => [...row]);
           newBoard[sr][sc] = null;
           newBoard[r][c] = turn;
           let newKilled = killed;
@@ -190,17 +227,21 @@ export default function TigerVsDogsAI({ depth = 3, aiPlayer = 'T', mode = 'hvh',
   useEffect(() => {
     const tigerPos = getTigerPosition(board);
     if (killed >= 6) setWinner('Tiger');
-    else if (tigerPos && getValidMoves(board, ...tigerPos).length === 0) setWinner('Dogs');
+    else if (!tigerPos || getValidMoves(board, ...getTigerPosition(board)).length === 0) setWinner('Dogs');
 
     const isAITurn = mode !== 'hvh' && turn === aiPlayer;
     const isAIvsAI = mode === 'aia';
 
-    if ((isAITurn || isAIvsAI) && !winner && !initialMoveMade.current) {
-      initialMoveMade.current = true;
-      const move = getBestMove(board, killed, depth, turn);
-      if (move) {
-        setTimeout(() => {
-          const newBoard = cloneBoard(board);
+    if ((isAITurn || isAIvsAI) && !winner && !movePending.current) {
+      movePending.current = true;
+
+      const currentDepth = turn === 'T' ? depthTiger : depthDogs;
+      const useAlphaBeta = aiType === 'alphabeta';
+
+      setTimeout(() => {
+        const move = getBestMove(board, killed, currentDepth, turn, useAlphaBeta);
+        if (move) {
+          const newBoard = board.map(row => [...row]);
           const [fr, fc] = move.from;
           const [tr, tc] = move.to;
           newBoard[fr][fc] = null;
@@ -213,11 +254,11 @@ export default function TigerVsDogsAI({ depth = 3, aiPlayer = 'T', mode = 'hvh',
           setBoard(newBoard);
           setKilled(newKilled);
           setTurn(turn === 'T' ? 'D' : 'T');
-          initialMoveMade.current = false;
-        }, 500);
-      }
+        }
+        movePending.current = false;
+      }, 500);
     }
-  }, [board, turn]);
+  }, [board, turn, mode, aiPlayer, aiType, depthTiger, depthDogs]);
 
   return (
     <div>
@@ -259,3 +300,4 @@ export default function TigerVsDogsAI({ depth = 3, aiPlayer = 'T', mode = 'hvh',
     </div>
   );
 }
+
