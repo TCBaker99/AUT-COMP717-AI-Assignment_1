@@ -135,6 +135,19 @@ export function getAlphaBetaMove(board, depth, size, ai) {
   return { row: move[0], col: move[1] };
 }
 
+// Added named variants for assessment
+export const Minimaxcomplete = (board, size, ai) =>
+  getMinimaxMove(board, Infinity, size, ai);
+
+export const ABcomplete = (board, size, ai) =>
+  getAlphaBetaMove(board, Infinity, size, ai);
+
+export const Minimaxlimited = (board, depth, size, ai) =>
+  getMinimaxMove(board, depth, size, ai);
+
+export const ABlimited = (board, depth, size, ai) =>
+  getAlphaBetaMove(board, depth, size, ai);
+
 export default function TicTacToeGame({
   size = 3,
   depth = 3,
