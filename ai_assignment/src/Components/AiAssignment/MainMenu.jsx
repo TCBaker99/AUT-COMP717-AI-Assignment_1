@@ -1,110 +1,101 @@
+
 import React, { useState } from 'react';
-import TicTacToeBoard from './TicTacToeBoard';
-import TicTacToeBoard7x7 from './TicTacToeBoard7x7';
-import TicTacMinMax from './TicTacMinMax';
-import MinMaxSelection from './MinMaxSelection';
-import AlphaBetaSelection from './AlphaBetaSelection';
-import TicTacAlphaBeta from './TicTacAlphaBeta';
-import AIvsAISelection from './AIvsAISelection';
-import TicTacAIBattle from './TicTacAIBattle';
 import './MainMenu.css';
+import './TicTacToe.css';
+import TicTacToeAI from './TicTacToeAI';
+import NimMenu from './NimMenu';
 
-const MainMenu = () => {
-  const [mode, setMode] = useState(null);
-  const [startingPlayer, setStartingPlayer] = useState('x');
-  const [depth, setDepth] = useState(9);
-  const [aiConfig, setAIConfig] = useState({ x: 'minmax', o: 'alphabeta' });
-  const [is7x7, setIs7x7] = useState(false);  // toggle state
+export default function MainMenu() {
+  const [inGame, setInGame] = useState(false);
+  const [inNimMenu, setInNimMenu] = useState(false);
+  const [gameKey, setGameKey] = useState(0);
+  const [size, setSize] = useState(3);
+  const [mode, setMode] = useState('hvh');
+  const [algorithm, setAlgorithm] = useState('minimax');
+  const [depth, setDepth] = useState(3);
+  const [depthMinimax, setDepthMinimax] = useState(3);
+  const [depthAlphaBeta, setDepthAlphaBeta] = useState(3);
+  const [aiPlayer, setAiPlayer] = useState('X');
 
-  if (mode === null) {
+  const toggleSize = () => setSize(prev => (prev === 3 ? 7 : 3));
+  const resetGame = () => setGameKey(prev => prev + 1);
+  const startGame = () => setInGame(true);
+  const backToMenu = () => setInGame(false);
+
+  if (inNimMenu) return <NimMenu onBack={() => setInNimMenu(false)} />;
+
+  if (!inGame) {
     return (
-      <div className='main-menu'>
-        <h1 className="main-menu-title">Tic Tac Toe Game</h1>
-        <h3 className="main-menu-subtitle">Select a Game Mode</h3>
+      <div className="main-menu">
+        <h1 className="main-menu-title">Tic Tac Toe AI</h1>
         <div className="AIMenu">
-          <button onClick={() => setMode("2p")}>1: 2 Player Mode</button>
-          <button onClick={() => setMode("minmax-select")}>2: Vs Minmax AI</button>
-          <button onClick={() => setMode("alphabeta-select")}>3: Vs Alpha Beta AI</button>
-          <button onClick={() => setMode("ai-battle-select")}>4: AI vs AI Mode</button>
-          <button onClick={() => setIs7x7(!is7x7)}>
-            Board Size: {is7x7 ? "7x7" : "3x3"}
-          </button>
+          <button onClick={toggleSize}>{size} x {size}</button>
+          <h3>Mode:</h3>
+          <select value={mode} onChange={e => setMode(e.target.value)}>
+            <option value="hvh">Human vs Human</option>
+            <option value="hva">Human vs AI</option>
+            <option value="ava">AI vs AI</option>
+          </select>
+          {mode === 'hva' && (
+            <>
+              <h3>Algorithm:</h3>
+              <select value={algorithm} onChange={e => setAlgorithm(e.target.value)}>
+                <option value="minimax">Minimax</option>
+                <option value="alphabeta">Alpha-Beta</option>
+              </select>
+              <h3>Depth:</h3>
+              <input
+                type="number"
+                min="1"
+                value={depth}
+                onChange={e => setDepth(parseInt(e.target.value) || 1)}
+              />
+              <h3>AI Plays:</h3>
+              <select value={aiPlayer} onChange={e => setAiPlayer(e.target.value)}>
+                <option value="X">X</option>
+                <option value="O">O</option>
+              </select>
+            </>
+          )}
+          {mode === 'ava' && (
+            <>
+              <h3>Minimax Depth:</h3>
+              <input
+                type="number"
+                min="1"
+                value={depthMinimax}
+                onChange={e => setDepthMinimax(parseInt(e.target.value) || 1)}
+              />
+              <h3>Alpha-Beta Depth:</h3>
+              <input
+                type="number"
+                min="1"
+                value={depthAlphaBeta}
+                onChange={e => setDepthAlphaBeta(parseInt(e.target.value) || 1)}
+              />
+            </>
+          )}
+          <button onClick={startGame}>Start Game</button>
+          <button style={{ float: 'right' }} onClick={() => setInNimMenu(true)}>→</button>
         </div>
       </div>
     );
   }
 
-  if (mode === "2p") {
-    return is7x7
-      ? <TicTacToeBoard7x7 onBack={() => setMode(null)} />
-      : <TicTacToeBoard onBack={() => setMode(null)} />;
-  }
-
-  if (mode === "minmax-select") {
-    return (
-      <MinMaxSelection
-        onSelect={({ player, depth }) => {
-          setStartingPlayer(player);
-          setDepth(depth);
-          setMode("minmax");
-        }}
-      />
-    );
-  }
-
-  if (mode === "minmax") {
-    return (
-      <TicTacMinMax
-        onBack={() => setMode(null)}
-        startingPlayer={startingPlayer}
+  return (
+    <div className="container">
+      <button className="reset" onClick={resetGame}>Reset Game</button>
+      <TicTacToeAI
+        key={gameKey}
+        size={size}
+        mode={mode}
+        algorithm={algorithm}
         depth={depth}
+        depthMinimax={depthMinimax}
+        depthAlphaBeta={depthAlphaBeta}
+        aiPlayer={aiPlayer}
+        onBackToMenu={backToMenu}
       />
-    );
-  }
-
-  if (mode === "alphabeta-select") {
-    return (
-      <AlphaBetaSelection
-        onSelect={({ player, depth }) => {
-          setStartingPlayer(player);
-          setDepth(depth);
-          setMode("alphabeta");
-        }}
-      />
-    );
-  }
-
-  if (mode === "alphabeta") {
-    return (
-      <TicTacAlphaBeta
-        onBack={() => setMode(null)}
-        startingPlayer={startingPlayer}
-        depth={depth}
-      />
-    );
-  }
-
-  if (mode === "ai-battle-select") {
-    return (
-      <AIvsAISelection
-        onSelect={(config) => {
-          setAIConfig(config);
-          setMode("ai-battle");
-        }}
-      />
-    );
-  }
-
-  if (mode === "ai-battle") {
-    return (
-      <TicTacAIBattle
-        aiTypes={aiConfig}
-        onBack={() => setMode(null)}
-      />
-    );
-  }
-
-  return null;
-};
-
-export default MainMenu;
+    </div>
+  );
+}
