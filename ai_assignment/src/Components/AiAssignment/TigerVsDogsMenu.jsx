@@ -59,7 +59,7 @@ export default function TigerVsDogsMenu({ onBack }) {
 
             <h3>Depth:</h3>
             <input
-              type="number"
+              type="number" max="10"
               min="1"
               value={aiPlayer === 'T' ? depthTiger : depthDogs}
               onChange={e => {
@@ -86,9 +86,9 @@ export default function TigerVsDogsMenu({ onBack }) {
             </select>
 
             <h3>Depth (Tiger):</h3>
-            <input type="number" min="1" value={depthTiger} onChange={e => setDepthTiger(parseInt(e.target.value) || 1)} />
+            <input type="number" max="10" min="1" value={depthTiger} onChange={e => setDepthTiger(parseInt(e.target.value) || 1)} />
             <h3>Depth (Dogs):</h3>
-            <input type="number" min="1" value={depthDogs} onChange={e => setDepthDogs(parseInt(e.target.value) || 1)} />
+            <input type="number" max="10" min="1" value={depthDogs} onChange={e => setDepthDogs(parseInt(e.target.value) || 1)} />
           </>
         )}
 

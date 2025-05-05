@@ -290,3 +290,17 @@ export default function TigerVsDogsAI({
     </div>
   );
 }
+
+// Complete
+const Minimaxcomplete = (board, killed, isMax, aiPlayer) =>
+  alphabeta(board, killed, Infinity, -Infinity, Infinity, isMax, aiPlayer, false);
+
+const ABcomplete = (board, killed, isMax, aiPlayer) =>
+  alphabeta(board, killed, Infinity, -Infinity, Infinity, isMax, aiPlayer, true);
+
+// Depth-limited
+const Minimaxlimited = (board, killed, depth, isMax, aiPlayer) =>
+  alphabeta(board, killed, depth, -Infinity, Infinity, isMax, aiPlayer, false);
+
+const ABlimited = (board, killed, depth, isMax, aiPlayer) =>
+  alphabeta(board, killed, depth, -Infinity, Infinity, isMax, aiPlayer, true);

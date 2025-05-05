@@ -45,7 +45,7 @@ export default function MainMenu() {
               </select>
               <h3>Depth:</h3>
               <input
-                type="number"
+                type="number" max="10"
                 min="1"
                 value={depth}
                 onChange={e => setDepth(parseInt(e.target.value) || 1)}
@@ -61,14 +61,14 @@ export default function MainMenu() {
             <>
               <h3>Minimax Depth:</h3>
               <input
-                type="number"
+                type="number" max="10"
                 min="1"
                 value={depthMinimax}
                 onChange={e => setDepthMinimax(parseInt(e.target.value) || 1)}
               />
               <h3>Alpha-Beta Depth:</h3>
               <input
-                type="number"
+                type="number" max="10"
                 min="1"
                 value={depthAlphaBeta}
                 onChange={e => setDepthAlphaBeta(parseInt(e.target.value) || 1)}

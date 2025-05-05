@@ -209,3 +209,11 @@ export default function ConnectFourAI({
     </div>
   );
 }
+
+// Complete
+const Minimaxcomplete = (board, rows, cols, ai) => minimax(board, Infinity, true, rows, cols, ai);
+const ABcomplete = (board, rows, cols, ai) => alphabeta(board, Infinity, -Infinity, Infinity, true, rows, cols, ai);
+
+// Depth-limited
+const Minimaxlimited = (board, depth, rows, cols, ai) => minimax(board, depth, true, rows, cols, ai);
+const ABlimited = (board, depth, rows, cols, ai) => alphabeta(board, depth, -Infinity, Infinity, true, rows, cols, ai);
