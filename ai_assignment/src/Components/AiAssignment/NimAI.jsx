@@ -156,10 +156,3 @@ export default function NimAI({
     </div>
   );
 }
-// Complete versions (no eval used explicitly here, just depth or game over)
-const Minimaxcomplete = (heaps, isMax, aiPlayer) => minimax(heaps, Infinity, isMax, aiPlayer);
-const ABcomplete = (heaps, isMax, aiPlayer) => alphabeta(heaps, Infinity, -Infinity, Infinity, isMax, aiPlayer);
-
-// Depth-limited versions (depth-limited + evaluate used)
-const Minimaxlimited = (heaps, depth, isMax, aiPlayer) => minimax(heaps, depth, isMax, aiPlayer);
-const ABlimited = (heaps, depth, isMax, aiPlayer) => alphabeta(heaps, depth, -Infinity, Infinity, isMax, aiPlayer);
